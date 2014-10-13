@@ -339,7 +339,7 @@ describe('tags-input directive', function() {
             expect($scope.$digest).not.toHaveBeenCalled();
         });
     });
-    
+
     describe('tabindex option', function() {
         it('sets the input field tab index', function() {
             // Arrange/Act
@@ -1035,7 +1035,65 @@ describe('tags-input directive', function() {
                 { label: 'Item3' }
             ]);
         });
+    });
 
+    describe('track-property option', function () {
+        it('initializes the option to ""', function () {
+            // Arrange/Act
+            compile();
+
+            // Assert
+            expect(isolateScope.options.trackProperty).toBe('');
+        });
+
+        it('allows settings tags with duplicate labels', function () {
+            // Arrange
+            $scope.tags= [
+                { id: 1, text: 'Tag' },
+                { id: 2, text: 'Tag' }
+            ];
+
+            // Act
+            compile('track-property="id"');
+
+            // Assert
+            // no exception
+        });
+
+        it('allows tracking tags by a custom property', function () {
+            // Arrange
+            $scope.tags = [
+                { id: 1, text: 'Tag' }
+            ];
+            compile('track-property="id"');
+
+            // Act
+            isolateScope.tagList.add({ id: 2, text: 'Tag' });
+
+            // Assert
+            expect(isolateScope.newTag.invalid).toBeFalsy();
+            expect($scope.tags).toEqual([
+                { id: 1, text: 'Tag' },
+                { id: 2, text: 'Tag' }
+            ]);
+        });
+
+        it('fails with duplicate track properties', function () {
+            // Arrange
+            $scope.tags = [
+                { id: 1, text: 'Tag' }
+            ];
+            compile('track-property="id"');
+
+            // Act
+            isolateScope.tagList.add({ id: 1, text: 'Other' });
+
+            // Assert
+            expect(isolateScope.newTag.invalid).toBeTruthy();
+            expect($scope.tags).toEqual([
+                { id: 1, text: 'Tag' }
+            ]);
+        });
     });
 
     describe('allow-leftover-text option', function() {
