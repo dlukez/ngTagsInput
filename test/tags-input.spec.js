@@ -339,7 +339,7 @@ describe('tags-input directive', function() {
             expect($scope.$digest).not.toHaveBeenCalled();
         });
     });
-    
+
     describe('tabindex option', function() {
         it('sets the input field tab index', function() {
             // Arrange/Act

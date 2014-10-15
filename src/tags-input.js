@@ -201,6 +201,7 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                 })
                 .on('tag-added tag-removed', function() {
                     ngModelCtrl.$setViewValue(scope.tags);
+                    tagList.selected = null;
                 })
                 .on('invalid-tag', function() {
                     scope.newTag.invalid = true;
@@ -296,9 +297,9 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                         return;
                     }
 
-                    scope.hasFocus = true;
                     events.trigger('input-focus');
 
+                    scope.hasFocus = true;
                     scope.$apply();
                 })
                 .on('blur', function() {
