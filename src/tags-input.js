@@ -10,6 +10,7 @@
  *
  * @param {string} ngModel Assignable angular expression to data-bind to.
  * @param {string=} [displayProperty=text] Property to be rendered as the tag label.
+ * @param {string=} [trackProperty=text] Property to be used for tracking items in the ng-repeat.
  * @param {string=} [type=text] Type of the input element. Only 'text', 'email' and 'url' are supported values.
  * @param {number=} tabindex Tab order of the control.
  * @param {string=} [placeholder=Add a tag] Placeholder text for the control.
@@ -37,7 +38,11 @@
  */
 tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) {
     function TagList(options, events) {
-        var self = {}, getTagText, setTagText, tagIsValid;
+        var self = {}, getTagText, setTagText, tagIsValid, getIdProperty;
+
+        getIdProperty = function() {
+            return options.trackProperty || options.displayProperty;
+        };
 
         getTagText = function(tag) {
             return safeToString(tag[options.displayProperty]);
@@ -54,7 +59,7 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                    tagText.length >= options.minLength &&
                    tagText.length <= options.maxLength &&
                    options.allowedTagsPattern.test(tagText) &&
-                   !findInObjectArray(self.items, tag, options.displayProperty);
+                   !findInObjectArray(self.items, tag, getIdProperty());
         };
 
         self.items = [];
@@ -143,6 +148,7 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                 minTags: [Number, 0],
                 maxTags: [Number, MAX_SAFE_INTEGER],
                 displayProperty: [String, 'text'],
+                trackProperty: [String, ''],
                 allowLeftoverText: [Boolean, false],
                 addFromAutocompleteOnly: [Boolean, false]
             });
@@ -235,7 +241,7 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
             };
 
             scope.track = function(tag) {
-                return tag[options.displayProperty];
+                return tag[options.trackProperty || options.displayProperty];
             };
 
             scope.newTagChange = function() {
