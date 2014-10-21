@@ -118,7 +118,8 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
         scope: {
             tags: '=ngModel',
             onTagAdded: '&',
-            onTagRemoved: '&'
+            onTagRemoved: '&',
+            disableInput: '='
         },
         replace: false,
         transclude: true,
