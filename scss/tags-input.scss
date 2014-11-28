@@ -19,6 +19,10 @@ tags-input {
       @include box-shadow($tags-outline-box-shadow);
     }
 
+    &.max-tags-enforced .input {
+      max-width: 0;
+    }
+
     .tag-list {
       margin: 0;
       padding: 0;

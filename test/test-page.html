@@ -49,6 +49,11 @@
         <auto-complete source="loadItems($query)" load-on-down-arrow="true"></auto-complete>
     </tags-input>
     <p></p>
+    Max tags enforced (3):
+    <tags-input ng-model="tags" max-tags="3" enforce-max-tags="true">
+        <auto-complete source="loadItems($query)" load-on-focus="true" load-on-down-arrow="true"></auto-complete>
+    </tags-input>
+    <p></p>
     <div class="input-group" style="width: 600px">
         <span class="input-group-addon">@</span>
         <tags-input ng-model="tags">

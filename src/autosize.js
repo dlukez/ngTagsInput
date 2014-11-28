@@ -20,6 +20,7 @@ tagsInput.directive('tiAutosize', function(tagsInputConfig) {
             span.css('display', 'none')
                 .css('visibility', 'hidden')
                 .css('width', 'auto')
+                .css('max-width', 'none')
                 .css('white-space', 'pre');
 
             element.parent().append(span);

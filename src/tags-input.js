@@ -17,6 +17,7 @@
  * @param {number=} [maxLength=MAX_SAFE_INTEGER] Maximum length allowed for a new tag.
  * @param {number=} [minTags=0] Sets minTags validation error key if the number of tags added is less than minTags.
  * @param {number=} [maxTags=MAX_SAFE_INTEGER] Sets maxTags validation error key if the number of tags added is greater than maxTags.
+ * @param {boolean=} [enforceMaxTags=false] Disables the input field when max tags is reached.
  * @param {boolean=} [allowLeftoverText=false] Sets leftoverText validation error key if there is any leftover text in
  *                                             the input element when the directive loses focus.
  * @param {string=} [removeTagSymbol=×] Symbol character for the remove tag button.
@@ -142,6 +143,7 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                 enableEditingLastTag: [Boolean, false],
                 minTags: [Number, 0],
                 maxTags: [Number, MAX_SAFE_INTEGER],
+                enforceMaxTags: [Boolean, false],
                 displayProperty: [String, 'text'],
                 allowLeftoverText: [Boolean, false],
                 addFromAutocompleteOnly: [Boolean, false]
@@ -152,7 +154,9 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
             this.registerAutocomplete = function() {
                 var input = $element.find('input');
                 input.on('keydown', function(e) {
-                    $scope.events.trigger('input-keydown', e);
+                    if (!$scope.maxTagsEnforced) {
+                        $scope.events.trigger('input-keydown', e);
+                    }
                 });
 
                 return {
@@ -184,13 +188,23 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                 events = scope.events,
                 options = scope.options,
                 input = element.find('input'),
-                validationOptions = ['minTags', 'maxTags', 'allowLeftoverText'],
-                setElementValidity;
+                validationOptions = ['minTags', 'maxTags', 'allowLeftoverText', 'enforceMaxTags'],
+                setElementValidity,
+                enforceMaxTags;
 
             setElementValidity = function() {
                 ngModelCtrl.$setValidity('maxTags', scope.tags.length <= options.maxTags);
                 ngModelCtrl.$setValidity('minTags', scope.tags.length >= options.minTags);
                 ngModelCtrl.$setValidity('leftoverText', options.allowLeftoverText ? true : !scope.newTag.text);
+                enforceMaxTags();
+            };
+
+            enforceMaxTags = function() {
+                if(options.enforceMaxTags && scope.tags.length >= options.maxTags) {
+                    scope.maxTagsEnforced = true;
+                } else {
+                    scope.maxTagsEnforced = false;
+                }
             };
 
             events
@@ -264,6 +278,12 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                         addKeys = {},
                         shouldAdd, shouldRemove;
 
+                    if (scope.maxTagsEnforced && key !== KEYS.backspace && key !== KEYS.tab) {
+                        e.stopImmediatePropagation();
+                        e.preventDefault();
+                        return;
+                    }
+
                     if (isModifier || hotkeys.indexOf(key) === -1) {
                         return;
                     }
@@ -297,7 +317,10 @@ tagsInput.directive('tagsInput', function($timeout, $document, tagsInputConfig) 
                     }
 
                     scope.hasFocus = true;
-                    events.trigger('input-focus');
+
+                    if(!scope.maxTagsEnforced) {
+                        events.trigger('input-focus');
+                    }
 
                     scope.$apply();
                 })

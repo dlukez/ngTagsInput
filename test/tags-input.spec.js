@@ -977,6 +977,105 @@ describe('tags-input directive', function() {
         });
     });
 
+    describe('enforce-max-tags option', function() {
+        it('initializes the option to false', function() {
+            // Arrange/Act
+            compile();
+
+            // Assert
+            expect(isolateScope.options.enforceMaxTags).toBe(false);
+        });
+
+        describe('max tags reached', function (){
+            function enforce() {
+                $scope.tags = generateTags(2);
+                compile('enforce-max-tags="true"', 'max-tags="2"');
+            }
+
+            it('sets the class of the tags element', function() {
+                // Arrange/Act
+                enforce();
+
+                // Assert
+                expect(element.find('div.tags')).toHaveClass('max-tags-enforced');
+            });
+
+            it('allows the backspace key to work', function() {
+                // Arrange
+                enforce();
+
+                // Act
+                sendBackspace();
+                sendBackspace();
+
+                // Assert
+                expect($scope.tags.length).toBe(1);
+            });
+
+            it('allows the tab key to work', function() {
+                // Arrange
+                enforce();
+
+                // Act
+                var event = sendKeyDown(KEYS.tab);
+
+                // Assert
+                expect(event.isDefaultPrevented()).toBe(false);
+            });
+
+            it('disallows text from being entered in the input', function() {
+                // Arrange
+                enforce();
+
+                // Act
+                var event = sendKeyDown(65);
+
+                // Assert
+                expect(event.isDefaultPrevented()).toBe(true);
+            });
+
+            it('prevents the "input-focus" event', function() {
+                // Arrange
+                enforce();
+                spyOn(isolateScope.events, 'trigger');
+
+                // Act
+                getInput().triggerHandler('focus');
+
+                // Assert
+                expect(isolateScope.events.trigger).not.toHaveBeenCalledWith('input-focus');
+            });
+        });
+
+        it('re-enforces max tags when the max-tags option changes', function() {
+            // Arrange
+            $scope.tags = generateTags(2);
+            compile('enforce-max-tags="true"', 'max-tags="2"');
+
+            // Act
+            isolateScope.options.maxTags = 3;
+            isolateScope.events.trigger('option-change', { name: 'maxTags' });
+            $scope.$digest();
+
+            // Assert
+            expect(isolateScope.maxTagsEnforced).toBe(false);
+        });
+
+        it('re-enforces max tags when the enforce-max-tags option changes', function() {
+            // Arrange
+            $scope.tags = generateTags(2);
+            compile('enforce-max-tags="true"', 'max-tags="2"');
+
+            // Act
+            isolateScope.options.enforceMaxTags = false;
+            isolateScope.events.trigger('option-change', { name: 'enforceMaxTags' });
+            $scope.$digest();
+
+            // Assert
+            expect(isolateScope.maxTagsEnforced).toBe(false);
+        });
+    });
+
     describe('display-property option', function() {
         it('initializes the option to "text"', function() {
             // Arrange/Act
